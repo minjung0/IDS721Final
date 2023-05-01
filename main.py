@@ -10,7 +10,6 @@ from tensorflow.python.keras.applications.xception import Xception
 from tensorflow.keras import layers, models, optimizers
 
 def dnn_model(x_train, y_train, x_test, y_test):
-    """Generate a simple model"""
     model = tf.keras.models.Sequential(
         [
             layers.Flatten(),
@@ -28,7 +27,6 @@ def dnn_model(x_train, y_train, x_test, y_test):
 
 
 def xception_model(x_train, y_train, x_test, y_test):
-    
     base_model = Xception(input_tensor=layers.Input(shape=(32,32,3)), weights="imagenet", include_top=False)
     x = base_model.output
     x = layers.GlobalAveragePooling2D()(x)
@@ -45,6 +43,7 @@ def xception_model(x_train, y_train, x_test, y_test):
     
     return model
 
+
 def _load_training_data(base_dir):
     x_train = np.load(os.path.join(base_dir, "train_data.npy"))
     y_train = np.load(os.path.join(base_dir, "train_labels.npy"))
@@ -60,8 +59,6 @@ def _load_testing_data(base_dir):
 def _parse_args():
     parser = argparse.ArgumentParser()
 
-    # Data, model, and output directories
-    # model_dir is always passed in from SageMaker. By default this is a S3 path under the default bucket.
     parser.add_argument("--model_dir", type=str)
     parser.add_argument("--sm-model-dir", type=str, default=os.environ.get("SM_MODEL_DIR"))
     parser.add_argument("--train", type=str, default=os.environ.get("SM_CHANNEL_TRAINING"))
@@ -79,6 +76,4 @@ if __name__ == "__main__":
 
     model = xception_model(train_data, train_labels, eval_data, eval_labels)
     if args.current_host == args.hosts[0]:
-        # save model to an S3 directory with version number '00000001' in Tensorflow SavedModel Format
-        # To export the model as h5 format use model.save('my_model.h5')
         model.save(os.path.join(args.sm_model_dir, "000000001"))
